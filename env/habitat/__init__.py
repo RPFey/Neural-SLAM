@@ -94,14 +94,17 @@ def construct_envs(args):
 
         args_list.append(args)
 
-    envs = VectorEnv(
-        make_env_fn=make_env_fn,
-        env_fn_args=tuple(
-            tuple(
-                zip(args_list, env_configs, baseline_configs,
-                    range(args.num_processes))
-            )
-        ),
-    )
+    if args.num_processes == 1:
+        envs = make_env_fn(args_list[0], env_configs[0], baseline_configs[0], 0)
+    else:
+        envs = VectorEnv(
+            make_env_fn=make_env_fn,
+            env_fn_args=tuple(
+                tuple(
+                    zip(args_list, env_configs, baseline_configs,
+                        range(args.num_processes))
+                )
+            ),
+        )
 
     return envs

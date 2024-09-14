@@ -14,14 +14,15 @@ class VecPyTorch():
 
     def __init__(self, venv, device):
         self.venv = venv
-        self.num_envs = venv.num_envs
+        self.num_envs = 1
         self.observation_space = venv.observation_space
         self.action_space = venv.action_space
         self.device = device
 
     def reset(self):
         obs, info = self.venv.reset()
-        obs = torch.from_numpy(obs).float().to(self.device)
+        obs = torch.from_numpy(obs).float().to(self.device).unsqueeze(0)
+        info = [info]
         return obs, info
 
     def step_async(self, actions):
@@ -37,8 +38,10 @@ class VecPyTorch():
     def step(self, actions):
         actions = actions.cpu().numpy()
         obs, reward, done, info = self.venv.step(actions)
-        obs = torch.from_numpy(obs).float().to(self.device)
-        reward = torch.from_numpy(reward).float()
+        obs = torch.from_numpy(obs).float().to(self.device).unsqueeze(0)
+        reward = torch.tensor([reward]).float()
+        done = [done]
+        info = [info]
         return obs, reward, done, info
 
     def get_rewards(self, inputs):
@@ -47,8 +50,8 @@ class VecPyTorch():
         return reward
 
     def get_short_term_goal(self, inputs):
-        stg = self.venv.get_short_term_goal(inputs)
-        stg = torch.from_numpy(stg).float()
+        stg = self.venv.get_short_term_goal(inputs[0])
+        stg = torch.from_numpy(stg).float().unsqueeze(0)
         return stg
 
     def close(self):

@@ -113,11 +113,18 @@ def main():
     per_step_g_rewards = deque(maxlen=1000)
 
     g_process_rewards = np.zeros((num_scenes))
+    agent_pose = np.zeros((args.max_episode_length, 7))
 
     # Starting environments
     torch.set_num_threads(1)
     envs = make_vec_envs(args)
     obs, infos = envs.reset()
+    agent_state = envs.venv._env._sim.get_agent_state(0)
+    pose_step = np.array([agent_state.position[0], agent_state.position[1], agent_state.position[2],
+                          agent_state.rotation.x, agent_state.rotation.y, agent_state.rotation.z,
+                          agent_state.rotation.w],
+                         dtype=np.float32)
+    agent_pose[0] = pose_step
 
     # Initialize map variables
     ### Full map consists of 4 channels containing the following:
@@ -325,6 +332,8 @@ def main():
 
     torch.set_grad_enabled(False)
 
+    import pdb; pdb.set_trace()
+
     for ep_num in range(num_episodes):
         for step in range(args.max_episode_length):
             total_num_steps += 1
@@ -360,6 +369,16 @@ def main():
             # ------------------------------------------------------------------
             # Env step
             obs, rew, done, infos = envs.step(l_action)
+            if args.eval and done[0]:
+                break
+
+            # record pose traj
+            agent_state = envs.venv._env._sim.get_agent_state(0)
+            pose_step = np.array([agent_state.position[0], agent_state.position[1], agent_state.position[2],
+                                agent_state.rotation.x, agent_state.rotation.y, agent_state.rotation.z,
+                                agent_state.rotation.w],
+                                dtype=np.float32)
+            agent_pose[step + 1] = pose_step
 
             l_masks = torch.FloatTensor([0 if x else 1
                                          for x in done]).to(device)
@@ -732,6 +751,8 @@ def main():
                                os.path.join(dump_dir,
                                             "periodic_{}.global".format(step)))
             # ------------------------------------------------------------------
+
+    np.savetxt("{}/agent_pose.txt".format(dump_dir), agent_pose, fmt='%.5f', delimiter=',')
 
     # Print and save model performance numbers during evaluation
     if args.eval:
