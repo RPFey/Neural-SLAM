@@ -71,6 +71,11 @@ Neural-SLAM/
 ```
 Please download the data using the instructions here: https://github.com/facebookresearch/habitat-api#data
 
+Link the config directory to the current folder
+```
+ln -s /path/to/habitat_api/configs /path/to/Neural-SLAM/configs
+```
+
 To verify that dependencies are correctly installed and data is setup correctly, run:
 ```
 python main.py -n1 --auto_gpu_config 0 --split val
