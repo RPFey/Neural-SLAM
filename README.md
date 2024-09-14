@@ -101,10 +101,7 @@ wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1o5O
 ### For evaluation:
 For evaluating the pre-trained models:
 ```
-python main.py --split val --eval 1 --train_global 0 --train_local 0 --train_slam 0 \
---load_global pretrained_models/model_best.global \
---load_local pretrained_models/model_best.local \
---load_slam pretrained_models/model_best.slam 
+python main.py --split val --eval 1 --train_global 0 --train_local 0 --train_slam 0 --load_global pretrained_models/model_best.global --load_local pretrained_models/model_best.local --load_slam pretrained_models/model_best.slam -n 1 --auto_gpu_config 0 -v 1 --eval 1 --num_episodes 1 --exp_name Denmark --print_images 1 --scene Denmark
 ```
 
 For visualizing the agent observations and predicted map and pose, add `-v 1` as an argument to the above

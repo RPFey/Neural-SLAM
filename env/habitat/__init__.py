@@ -13,8 +13,14 @@ from .habitat_api.habitat_baselines.config.default import get_config as cfg_base
 
 def make_env_fn(args, config_env, config_baseline, rank):
     dataset = PointNavDatasetV1(config_env.DATASET)
+    
+    scene_name = args.scene
+    scene_episode = [episode for episode in dataset.episodes if episode.scene_id.split('/')[-1].split('.')[0] == scene_name]
+    scene_episode.sort(key=lambda x: x.episode_id)
+    dataset.episodes = scene_episode
+
     config_env.defrost()
-    config_env.SIMULATOR.SCENE = dataset.episodes[0].scene_id
+    config_env.SIMULATOR.SCENE = scene_episode[0].scene_id
     print("Loading {}".format(config_env.SIMULATOR.SCENE))
     config_env.freeze()
 
@@ -36,7 +42,7 @@ def construct_envs(args):
     basic_config.defrost()
     basic_config.DATASET.SPLIT = args.split
     basic_config.freeze()
-
+    
     scenes = PointNavDatasetV1.get_scenes_to_load(basic_config.DATASET)
 
     if len(scenes) > 0:

@@ -332,8 +332,6 @@ def main():
 
     torch.set_grad_enabled(False)
 
-    import pdb; pdb.set_trace()
-
     for ep_num in range(num_episodes):
         for step in range(args.max_episode_length):
             total_num_steps += 1
